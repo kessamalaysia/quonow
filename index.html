@@ -1,131 +1,57 @@
-<!-- KESSA Professional Quotation Layout (PDF Template Section) -->
-<!-- Replace your generatePDF() body with this layout logic -->
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>KESSA Quotation V3</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+body{font-family:'Courier New',monospace;background:#f2f2f2;padding:20px}
+.container{max-width:1100px;margin:auto;background:white;padding:20px;border-radius:8px}
+input,textarea{width:100%;padding:8px;margin:4px 0}
+button{padding:10px 20px}
+</style>
+</head>
+<body>
+<div class="container">
+<h2>KESSA QUOTATION GENERATOR V3</h2>
+<p>Layout inspired by your sample quotation.</p>
 
-/*
+<label>Customer</label><input id="customer">
+<label>Company</label><input id="company">
+<label>Address</label><textarea id="address"></textarea>
+
+<p><b>NOTE:</b> Replace generatePDF() with your jsPDF logic and use the layout from the sample.</p>
+
+<pre>
 HEADER
-KESSA LOGO
+[KESSA LOGO]
 KESSA INTEGRATED SOLUTION
-Electrical | Biomedical | Green Energy
-*/
+QUOTATION                                 ORIGINAL
 
-let y = 20;
+DATE:
+CUSTOMER:
 
-doc.setFontSize(20);
-doc.text("QUOTATION", 105, y, {align:"center"});
+OUR REF:
+ACCOUNT NO:
 
-y += 15;
+------------------------------------------------------
+ITEM | QTY | PKG | DESCRIPTION | UNIT PRICE | TOTAL
+------------------------------------------------------
 
-doc.setFontSize(10);
-doc.text("OUR REF :", 20, y);
-doc.text(quotationNo, 60, y);
+SUBTOTAL
+SST 8%
+DISCOUNT
+GRAND TOTAL
 
-y += 6;
+VALIDITY PERIOD
+PAYMENT TERMS
+TERMS & CONDITIONS
+LEAD TIME
+BANK DETAILS
 
-doc.text("DATE :", 20, y);
-doc.text(new Date().toLocaleDateString(), 60, y);
-
-y += 15;
-
-doc.text(customer,20,y);
-y += 6;
-doc.text(company,20,y);
-y += 6;
-
-const addressLines = doc.splitTextToSize(address,80);
-doc.text(addressLines,20,y);
-
-y += addressLines.length * 6 + 15;
-
-doc.text("Thank you for your inquiry and we are pleased to quote you as below:-",40,y);
-
-y += 10;
-
-doc.line(20,y,190,y);
-
-y += 8;
-
-doc.text("ITEM",20,y);
-doc.text("QTY",45,y);
-doc.text("DESCRIPTION",75,y);
-doc.text("UNIT PRICE",140,y);
-doc.text("TOTAL",175,y);
-
-y += 5;
-
-doc.line(20,y,190,y);
-
-y += 10;
-
-// LOOP ITEMS HERE
-
-doc.line(20,y,190,y);
-
-y += 15;
-
-doc.text("SUBTOTAL",110,y);
-doc.text("RM " + subtotal.toFixed(2),170,y,{align:"right"});
-
-y += 8;
-
-doc.text("SST 8%",110,y);
-doc.text("RM " + sst.toFixed(2),170,y,{align:"right"});
-
-y += 8;
-
-doc.text("DISCOUNT",110,y);
-doc.text("RM " + discount.toFixed(2),170,y,{align:"right"});
-
-y += 8;
-
-doc.line(150,y,190,y);
-
-y += 8;
-
-doc.setFontSize(12);
-doc.text("GRAND TOTAL",110,y);
-doc.text("RM " + finalTotal.toFixed(2),170,y,{align:"right"});
-
-y += 15;
-
-doc.setFontSize(10);
-
-doc.text("VALIDITY PERIOD",20,y);
-doc.text(": 30 Days",70,y);
-
-y += 8;
-
-doc.text("PAYMENT TERMS",20,y);
-doc.text(": 30 Days",70,y);
-
-y += 12;
-
-doc.text("TERMS & CONDITIONS",20,y);
-
-y += 6;
-
-doc.text("1. This quotation is valid for 30 days from date of issue.",20,y);
-y += 5;
-
-doc.text("2. Purchase Order required before work commencement.",20,y);
-y += 5;
-
-doc.text("3. Additional works will be charged separately.",20,y);
-y += 5;
-
-doc.text("4. Delivery subject to stock availability.",20,y);
-
-y += 15;
-
-doc.text("Prepared By,",20,y);
-
-y += 18;
-
-doc.text("Dato' Khairul",20,y);
-
-y += 5;
-
-doc.text("Managing Director",20,y);
-
-y += 5;
-
-doc.text("Kessa Integrated Solution",20,y);
+Prepared By,
+Dato' Khairul
+</pre>
+</div>
+</body>
+</html>
