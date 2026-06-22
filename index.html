@@ -1,168 +1,131 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>KESSA Quotation Generator Pro</title>
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<style>
-body{background:#f5f5f5}
-.card{border:none;border-radius:15px}
-</style>
-</head>
-<body>
-<div class="container py-4">
-<div class="card shadow p-4">
-<h2 class="text-center">KESSA QUOTATION GENERATOR PRO</h2>
+<!-- KESSA Professional Quotation Layout (PDF Template Section) -->
+<!-- Replace your generatePDF() body with this layout logic -->
 
-<div class="row mt-3">
-<div class="col-md-6">
-<label>Customer Name</label>
-<input id="customer" class="form-control">
-</div>
-<div class="col-md-6">
-<label>Company Name</label>
-<input id="company" class="form-control">
-</div>
-</div>
+/*
+HEADER
+KESSA LOGO
+KESSA INTEGRATED SOLUTION
+Electrical | Biomedical | Green Energy
+*/
 
-<div class="mt-3">
-<label>Address</label>
-<textarea id="address" class="form-control"></textarea>
-</div>
+let y = 20;
 
-<hr>
+doc.setFontSize(20);
+doc.text("QUOTATION", 105, y, {align:"center"});
 
-<div class="row">
-<div class="col-md-5"><input id="item" class="form-control" placeholder="Description"></div>
-<div class="col-md-2"><input id="qty" type="number" class="form-control" placeholder="Qty"></div>
-<div class="col-md-2"><input id="price" type="number" class="form-control" placeholder="Price"></div>
-<div class="col-md-3"><button class="btn btn-primary w-100" onclick="addItem()">Add Item</button></div>
-</div>
+y += 15;
 
-<table class="table mt-3">
-<thead><tr><th>Description</th><th>Qty</th><th>Price</th><th>Total</th></tr></thead>
-<tbody id="itemTable"></tbody>
-</table>
+doc.setFontSize(10);
+doc.text("OUR REF :", 20, y);
+doc.text(quotationNo, 60, y);
 
-<div class="row">
-<div class="col-md-3">
-<label>Discount (RM)</label>
-<input id="discount" type="number" class="form-control" value="0">
-</div>
-</div>
+y += 6;
 
-<h4 class="mt-3">Grand Total (incl. SST): RM <span id="grandTotal">0.00</span></h4>
+doc.text("DATE :", 20, y);
+doc.text(new Date().toLocaleDateString(), 60, y);
 
-<button class="btn btn-success btn-lg" onclick="generatePDF()">Generate PDF</button>
-</div>
-</div>
+y += 15;
 
-<script>
-let items=[];
+doc.text(customer,20,y);
+y += 6;
+doc.text(company,20,y);
+y += 6;
 
-function addItem(){
- const item=document.getElementById('item').value;
- const qty=parseFloat(document.getElementById('qty').value);
- const price=parseFloat(document.getElementById('price').value);
- if(!item||!qty||!price){alert('Fill all fields');return;}
- items.push({item,qty,price,total:qty*price});
- renderTable();
- document.getElementById('item').value='';
- document.getElementById('qty').value='';
- document.getElementById('price').value='';
-}
+const addressLines = doc.splitTextToSize(address,80);
+doc.text(addressLines,20,y);
 
-function renderTable(){
- let html='',subtotal=0;
- items.forEach(x=>{
-   subtotal+=x.total;
-   html+=`<tr><td>${x.item}</td><td>${x.qty}</td><td>${x.price.toFixed(2)}</td><td>${x.total.toFixed(2)}</td></tr>`;
- });
- document.getElementById('itemTable').innerHTML=html;
+y += addressLines.length * 6 + 15;
 
- const discount=parseFloat(document.getElementById('discount').value)||0;
- const sst=subtotal*0.08;
- const total=subtotal+sst-discount;
- document.getElementById('grandTotal').innerText=total.toFixed(2);
-}
-document.getElementById('discount').addEventListener('input',renderTable);
+doc.text("Thank you for your inquiry and we are pleased to quote you as below:-",40,y);
 
-async function generatePDF(){
- const {jsPDF}=window.jspdf;
- const doc=new jsPDF();
+y += 10;
 
- const customer=document.getElementById('customer').value;
- const company=document.getElementById('company').value;
- const address=document.getElementById('address').value;
+doc.line(20,y,190,y);
 
- let q='Q-'+new Date().getFullYear()+'-'+Math.floor(Math.random()*10000);
- let y=20;
+y += 8;
 
- doc.setFontSize(18);
- doc.text('KESSA INTEGRATED SOLUTION',20,y);
- y+=7;
- doc.setFontSize(10);
- doc.text('Electrical | Biomedical | Green Energy',20,y);
- y+=7;
- doc.text('Validity: 30 Days',20,y);
- y+=5;
- doc.text('Payment Term: 30 Days',20,y);
- y+=10;
+doc.text("ITEM",20,y);
+doc.text("QTY",45,y);
+doc.text("DESCRIPTION",75,y);
+doc.text("UNIT PRICE",140,y);
+doc.text("TOTAL",175,y);
 
- doc.text('Quotation No: '+q,20,y);
- y+=5;
- doc.text('Date: '+new Date().toLocaleDateString(),20,y);
- y+=10;
+y += 5;
 
- doc.text('Customer: '+customer,20,y); y+=5;
- doc.text('Company: '+company,20,y); y+=5;
- doc.text('Address: '+address,20,y); y+=10;
+doc.line(20,y,190,y);
 
- doc.text('Description',20,y);
- doc.text('Qty',110,y);
- doc.text('Price',140,y);
- doc.text('Total',170,y);
- y+=3;
- doc.line(20,y,190,y);
- y+=8;
+y += 10;
 
- let subtotal=0;
- items.forEach(x=>{
-   doc.text(x.item,20,y);
-   doc.text(String(x.qty),110,y);
-   doc.text(x.price.toFixed(2),140,y);
-   doc.text(x.total.toFixed(2),170,y);
-   subtotal+=x.total;
-   y+=7;
- });
+// LOOP ITEMS HERE
 
- const discount=parseFloat(document.getElementById('discount').value)||0;
- const sst=subtotal*0.08;
- const grand=subtotal+sst-discount;
+doc.line(20,y,190,y);
 
- y+=5;
- doc.text('Subtotal: RM '+subtotal.toFixed(2),120,y); y+=6;
- doc.text('SST 8%: RM '+sst.toFixed(2),120,y); y+=6;
- doc.text('Discount: RM '+discount.toFixed(2),120,y); y+=6;
- doc.text('Grand Total: RM '+grand.toFixed(2),120,y);
+y += 15;
 
- y+=15;
- doc.text('Terms & Conditions',20,y); y+=6;
- doc.setFontSize(9);
- doc.text('1. Valid for 30 days.',20,y); y+=5;
- doc.text('2. PO required before work commencement.',20,y); y+=5;
- doc.text('3. Payment term 30 days.',20,y); y+=5;
+doc.text("SUBTOTAL",110,y);
+doc.text("RM " + subtotal.toFixed(2),170,y,{align:"right"});
 
- y+=10;
- doc.setFontSize(10);
- doc.text('Prepared By,',20,y); y+=18;
- doc.text("Dato' Khairul",20,y); y+=5;
- doc.text('Managing Director',20,y);
+y += 8;
 
- doc.save(q+'.pdf');
-}
-</script>
-</body>
-</html>
+doc.text("SST 8%",110,y);
+doc.text("RM " + sst.toFixed(2),170,y,{align:"right"});
+
+y += 8;
+
+doc.text("DISCOUNT",110,y);
+doc.text("RM " + discount.toFixed(2),170,y,{align:"right"});
+
+y += 8;
+
+doc.line(150,y,190,y);
+
+y += 8;
+
+doc.setFontSize(12);
+doc.text("GRAND TOTAL",110,y);
+doc.text("RM " + finalTotal.toFixed(2),170,y,{align:"right"});
+
+y += 15;
+
+doc.setFontSize(10);
+
+doc.text("VALIDITY PERIOD",20,y);
+doc.text(": 30 Days",70,y);
+
+y += 8;
+
+doc.text("PAYMENT TERMS",20,y);
+doc.text(": 30 Days",70,y);
+
+y += 12;
+
+doc.text("TERMS & CONDITIONS",20,y);
+
+y += 6;
+
+doc.text("1. This quotation is valid for 30 days from date of issue.",20,y);
+y += 5;
+
+doc.text("2. Purchase Order required before work commencement.",20,y);
+y += 5;
+
+doc.text("3. Additional works will be charged separately.",20,y);
+y += 5;
+
+doc.text("4. Delivery subject to stock availability.",20,y);
+
+y += 15;
+
+doc.text("Prepared By,",20,y);
+
+y += 18;
+
+doc.text("Dato' Khairul",20,y);
+
+y += 5;
+
+doc.text("Managing Director",20,y);
+
+y += 5;
+
+doc.text("Kessa Integrated Solution",20,y);
