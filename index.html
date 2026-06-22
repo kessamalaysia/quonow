@@ -1,57 +1,155 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<meta charset="utf-8">
-<title>KESSA Quotation V3</title>
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+<title>KESSA Quotation Generator V4 Updated</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
-body{font-family:'Courier New',monospace;background:#f2f2f2;padding:20px}
-.container{max-width:1100px;margin:auto;background:white;padding:20px;border-radius:8px}
-input,textarea{width:100%;padding:8px;margin:4px 0}
-button{padding:10px 20px}
+body{background:#f4f4f4}
+.card{max-width:1200px;margin:auto}
+table input{min-width:120px}
 </style>
 </head>
 <body>
-<div class="container">
-<h2>KESSA QUOTATION GENERATOR V3</h2>
-<p>Layout inspired by your sample quotation.</p>
+<div class="container py-4">
+<div class="card p-4 shadow">
+<h2>KESSA Quotation Generator</h2>
 
-<label>Customer</label><input id="customer">
-<label>Company</label><input id="company">
-<label>Address</label><textarea id="address"></textarea>
-
-<p><b>NOTE:</b> Replace generatePDF() with your jsPDF logic and use the layout from the sample.</p>
-
-<pre>
-HEADER
-[KESSA LOGO]
-KESSA INTEGRATED SOLUTION
-QUOTATION                                 ORIGINAL
-
-DATE:
-CUSTOMER:
-
-OUR REF:
-ACCOUNT NO:
-
-------------------------------------------------------
-ITEM | QTY | PKG | DESCRIPTION | UNIT PRICE | TOTAL
-------------------------------------------------------
-
-SUBTOTAL
-SST 8%
-DISCOUNT
-GRAND TOTAL
-
-VALIDITY PERIOD
-PAYMENT TERMS
-TERMS & CONDITIONS
-LEAD TIME
-BANK DETAILS
-
-Prepared By,
-Dato' Khairul
-</pre>
+<div class="row">
+<div class="col-md-6"><input id="customer" class="form-control" placeholder="Customer"></div>
+<div class="col-md-6"><input id="company" class="form-control" placeholder="Company"></div>
 </div>
+
+<textarea id="address" class="form-control mt-2" placeholder="Address"></textarea>
+
+<div class="form-check mt-3">
+<input class="form-check-input" type="checkbox" id="sst" checked>
+<label class="form-check-label">Apply SST 8%</label>
+</div>
+
+<table class="table mt-3" id="tbl">
+<thead><tr><th>Description</th><th>Qty</th><th>Unit Price</th><th></th></tr></thead>
+<tbody></tbody>
+</table>
+
+<button class="btn btn-primary" onclick="addRow()">Add Item</button>
+<button class="btn btn-success" onclick="generatePDF()">Generate PDF</button>
+</div>
+</div>
+
+<script>
+let runningNo = localStorage.getItem('kessa_quote_no') || 1;
+
+function addRow(){
+const tr=document.createElement('tr');
+tr.innerHTML=`
+<td><input class="form-control desc"></td>
+<td><input class="form-control qty" type="number" value="1"></td>
+<td><input class="form-control price" type="number" value="0"></td>
+<td><button class="btn btn-danger" onclick="this.parentElement.parentElement.remove()">X</button></td>`;
+document.querySelector('#tbl tbody').appendChild(tr);
+}
+addRow();
+
+async function generatePDF(){
+const {jsPDF}=window.jspdf;
+const doc=new jsPDF();
+
+const qNo='Q-2026-'+String(runningNo).padStart(4,'0');
+localStorage.setItem('kessa_quote_no', ++runningNo);
+
+let y=15;
+doc.setFont('courier','bold');
+doc.setFontSize(18);
+doc.text('QUOTATION',105,y,{align:'center'});
+
+y+=10;
+doc.setFontSize(10);
+
+doc.text('KESSA INTEGRATED SOLUTION',15,y);
+y += 5;
+doc.text('SSM: 202603054901 (003828573-D)',15,y);
+y += 6;
+
+const companyAddress = [
+'E96, Pangsapuri Seri Utama, Jalan PU6,',
+'Taman Puchong Utama,',
+'47140, Puchong, Selangor, Malaysia'
+];
+
+doc.text(companyAddress,15,y);
+y += 16;
+
+doc.text('Tel: 011 3765 9851',15,y);
+doc.text('Email: infokessa.malaysia@gmail.com',70,y);
+y += 5;
+doc.text('Website: www.kessa.my',15,y);
+
+doc.text('ORIGINAL',170,15);
+
+y += 15;
+doc.text('OUR REF : '+qNo,15,y);
+doc.text('DATE : '+new Date().toLocaleDateString(),130,y);
+
+y+=10;
+doc.text(document.getElementById('customer').value,15,y); y+=5;
+doc.text(document.getElementById('company').value,15,y); y+=5;
+
+const addr=doc.splitTextToSize(document.getElementById('address').value,80);
+doc.text(addr,15,y);
+y += addr.length*5+8;
+
+doc.line(10,y,200,y); y+=5;
+doc.text('ITEM',15,y);
+doc.text('QTY',120,y);
+doc.text('UNIT PRICE',145,y);
+doc.text('TOTAL',180,y);
+y+=3; doc.line(10,y,200,y); y+=7;
+
+let subtotal=0;
+document.querySelectorAll('#tbl tbody tr').forEach((r,i)=>{
+const d=r.querySelector('.desc').value||'-';
+const q=parseFloat(r.querySelector('.qty').value)||0;
+const p=parseFloat(r.querySelector('.price').value)||0;
+const t=q*p;
+subtotal+=t;
+doc.text(String(i+1),15,y);
+doc.text(d,25,y);
+doc.text(String(q),120,y);
+doc.text(p.toFixed(2),145,y);
+doc.text(t.toFixed(2),180,y);
+y+=6;
+});
+
+const sst=document.getElementById('sst').checked ? subtotal*0.08 : 0;
+const grand=subtotal+sst;
+
+y+=10;
+doc.text('SUBTOTAL',130,y); doc.text(subtotal.toFixed(2),180,y);
+y+=6;
+doc.text('SST',130,y); doc.text(sst.toFixed(2),180,y);
+y+=6;
+doc.setFont('courier','bold');
+doc.text('GRAND TOTAL',130,y); doc.text(grand.toFixed(2),180,y);
+
+y+=15;
+doc.setFont('courier','normal');
+doc.text('VALIDITY PERIOD : 30 DAYS',15,y); y+=5;
+doc.text('PAYMENT TERMS : 30 DAYS',15,y); y+=5;
+doc.text('BANK : HONG LEONG BANK',15,y); y+=5;
+doc.text('ACCOUNT : 0192874050',15,y);
+
+y+=12;
+doc.text('Prepared By,',15,y);
+y+=15;
+doc.text("Dato\' Khairul",15,y);
+y+=5;
+doc.text('Managing Director',15,y);
+
+doc.save(qNo+'.pdf');
+}
+</script>
 </body>
 </html>
