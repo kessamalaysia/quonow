@@ -15,11 +15,16 @@ table input{min-width:120px}
 <body>
 <div class="container py-4">
 <div class="card p-4 shadow">
-<h2>KESSA Quotation Generator</h2>
+<h2>Kessa Integrated Solution Quotation Generator</h2>
 
 <div class="row">
 <div class="col-md-6"><input id="customer" class="form-control" placeholder="Customer"></div>
 <div class="col-md-6"><input id="company" class="form-control" placeholder="Company"></div>
+</div>
+
+<div class="row mt-2">
+<div class="col-md-6"><input id="customerTel" class="form-control" placeholder="Customer Telephone"></div>
+<div class="col-md-6"><input id="customerEmail" class="form-control" placeholder="Customer Email"></div>
 </div>
 
 <textarea id="address" class="form-control mt-2" placeholder="Address"></textarea>
@@ -29,8 +34,13 @@ table input{min-width:120px}
 <label class="form-check-label">Apply SST 8%</label>
 </div>
 
+<div class="mt-3">
+<label>Discount (RM)</label>
+<input id="discount" type="number" class="form-control" value="0" step="0.01">
+</div>
+
 <table class="table mt-3" id="tbl">
-<thead><tr><th>Description</th><th>Qty</th><th>Unit Price</th><th></th></tr></thead>
+<thead><tr><th>Description</th><th>Part No.</th><th>Qty</th><th>Unit Price</th><th></th></tr></thead>
 <tbody></tbody>
 </table>
 
@@ -45,7 +55,8 @@ let runningNo = localStorage.getItem('kessa_quote_no') || 1;
 function addRow(){
 const tr=document.createElement('tr');
 tr.innerHTML=`
-<td><input class="form-control desc"></td>
+<td><input class="form-control desc" placeholder="Description"></td>
+<td><input class="form-control partno" placeholder="Part No."></td>
 <td><input class="form-control qty" type="number" value="1"></td>
 <td><input class="form-control price" type="number" value="0"></td>
 <td><button class="btn btn-danger" onclick="this.parentElement.parentElement.remove()">X</button></td>`;
@@ -66,9 +77,11 @@ doc.setFontSize(18);
 doc.text('QUOTATION',105,y,{align:'center'});
 
 y+=10;
-doc.setFontSize(10);
-
+doc.setFontSize(12);
+doc.setFont('courier','bold');
 doc.text('KESSA INTEGRATED SOLUTION',15,y);
+//y+=5;
+doc.setFontSize(10);
 y += 5;
 doc.text('SSM: 202603054901 (003828573-D)',15,y);
 y += 6;
@@ -94,8 +107,10 @@ doc.text('OUR REF : '+qNo,15,y);
 doc.text('DATE : '+new Date().toLocaleDateString(),130,y);
 
 y+=10;
-doc.text(document.getElementById('customer').value,15,y); y+=5;
-doc.text(document.getElementById('company').value,15,y); y+=5;
+doc.text('Customer',15,y); doc.text(': '+document.getElementById('customer').value,45,y); y+=5;
+doc.text('Company',15,y); doc.text(': '+document.getElementById('company').value,45,y); y+=5;
+doc.text('Tel',15,y); doc.text(': '+document.getElementById('customerTel').value,45,y); y+=5;
+doc.text('Email',15,y); doc.text(': '+document.getElementById('customerEmail').value,45,y); y+=5;
 
 const addr=doc.splitTextToSize(document.getElementById('address').value,80);
 doc.text(addr,15,y);
@@ -103,7 +118,9 @@ y += addr.length*5+8;
 
 doc.line(10,y,200,y); y+=5;
 doc.text('ITEM',15,y);
-doc.text('QTY',120,y);
+doc.text('DESCRIPTION',30,y);
+doc.text('PART NO.',95,y);
+doc.text('QTY',125,y);
 doc.text('UNIT PRICE',145,y);
 doc.text('TOTAL',180,y);
 y+=3; doc.line(10,y,200,y); y+=7;
@@ -111,25 +128,50 @@ y+=3; doc.line(10,y,200,y); y+=7;
 let subtotal=0;
 document.querySelectorAll('#tbl tbody tr').forEach((r,i)=>{
 const d=r.querySelector('.desc').value||'-';
+const part=r.querySelector('.partno').value||'-';
 const q=parseFloat(r.querySelector('.qty').value)||0;
 const p=parseFloat(r.querySelector('.price').value)||0;
 const t=q*p;
 subtotal+=t;
+
+if(y > 250){
+doc.addPage();
+y = 20;
+doc.setFont('courier','bold');
+doc.line(10,y,200,y);
+y+=5;
+doc.text('ITEM',15,y);
+doc.text('DESCRIPTION',30,y);
+doc.text('PART NO.',95,y);
+doc.text('QTY',125,y);
+doc.text('UNIT PRICE',145,y);
+doc.text('TOTAL',180,y);
+y+=3;
+doc.line(10,y,200,y);
+y+=7;
+}
+
 doc.text(String(i+1),15,y);
-doc.text(d,25,y);
-doc.text(String(q),120,y);
+doc.text(d,30,y);
+doc.text(part,95,y);
+doc.text(String(q),125,y);
 doc.text(p.toFixed(2),145,y);
 doc.text(t.toFixed(2),180,y);
 y+=6;
 });
 
 const sst=document.getElementById('sst').checked ? subtotal*0.08 : 0;
-const grand=subtotal+sst;
+const discount=parseFloat(document.getElementById('discount').value)||0;
+const grand=subtotal+sst-discount;
+
+if(y > 220){ doc.addPage(); y=20; }
 
 y+=10;
 doc.text('SUBTOTAL',130,y); doc.text(subtotal.toFixed(2),180,y);
 y+=6;
 doc.text('SST',130,y); doc.text(sst.toFixed(2),180,y);
+y+=6;
+doc.text('DISCOUNT',130,y); doc.text(discount.toFixed(2),180,y);
 y+=6;
 doc.setFont('courier','bold');
 doc.text('GRAND TOTAL',130,y); doc.text(grand.toFixed(2),180,y);
@@ -138,13 +180,13 @@ y+=15;
 doc.setFont('courier','normal');
 doc.text('VALIDITY PERIOD : 30 DAYS',15,y); y+=5;
 doc.text('PAYMENT TERMS : 30 DAYS',15,y); y+=5;
-doc.text('BANK : HONG LEONG BANK',15,y); y+=5;
-doc.text('ACCOUNT : 0192874050',15,y);
+doc.text('BANK : HONG LEONG BANK (KESSA INTEGRATED SOLUTION)',15,y); y+=5;
+doc.text('ACCOUNT : 39501264047',15,y);
 
 y+=12;
 doc.text('Prepared By,',15,y);
 y+=15;
-doc.text("Dato\' Khairul",15,y);
+doc.text("Ts. Muhammad\ Khairul Bin Samuri",15,y);
 y+=5;
 doc.text('Managing Director',15,y);
 
