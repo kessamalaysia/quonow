@@ -117,12 +117,12 @@ doc.text(addr,15,y);
 y += addr.length*5+8;
 
 doc.line(10,y,200,y); y+=5;
-doc.text('ITEM',15,y);
+doc.text('ITEM',15,y,{align:'center'});
 doc.text('DESCRIPTION',30,y);
-doc.text('PART NO.',95,y);
-doc.text('QTY',125,y);
-doc.text('UNIT PRICE',145,y);
-doc.text('TOTAL',180,y);
+doc.text('PART NO.',110,y,{align:'center'});
+doc.text('QTY',130,y,{align:'center'});
+doc.text('UNIT PRICE',170,y,{align:'right'});
+doc.text('TOTAL',195,y,{align:'right'});
 y+=3; doc.line(10,y,200,y); y+=7;
 
 let subtotal=0;
@@ -140,24 +140,34 @@ y = 20;
 doc.setFont('courier','bold');
 doc.line(10,y,200,y);
 y+=5;
-doc.text('ITEM',15,y);
+doc.text('ITEM',15,y,{align:'center'});
 doc.text('DESCRIPTION',30,y);
-doc.text('PART NO.',95,y);
-doc.text('QTY',125,y);
-doc.text('UNIT PRICE',145,y);
-doc.text('TOTAL',180,y);
+doc.text('PART NO.',110,y,{align:'center'});
+doc.text('QTY',130,y,{align:'center'});
+doc.text('UNIT PRICE',170,y,{align:'right'});
+doc.text('TOTAL',195,y,{align:'right'});
 y+=3;
 doc.line(10,y,200,y);
 y+=7;
 }
 
+const descLines = doc.splitTextToSize(d, 55);
+const partLines = doc.splitTextToSize(part, 20);
+
 doc.text(String(i+1),15,y);
-doc.text(d,30,y);
-doc.text(part,95,y);
-doc.text(String(q),125,y);
-doc.text(p.toFixed(2),145,y);
-doc.text(t.toFixed(2),180,y);
-y+=6;
+doc.text(descLines,30,y);
+doc.text(partLines,110,y,{align:'center'});
+doc.text(String(q),130,y,{align:'center'});
+doc.text(p.toFixed(2),170,y,{align:'right'});
+doc.text(t.toFixed(2),195,y,{align:'right'});
+
+const rowHeight = Math.max(
+descLines.length * 5,
+partLines.length * 5,
+6
+);
+
+y += rowHeight + 2;
 });
 
 const sst=document.getElementById('sst').checked ? subtotal*0.08 : 0;
