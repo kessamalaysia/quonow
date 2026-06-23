@@ -144,8 +144,8 @@ doc.text('ITEM',15,y,{align:'center'});
 doc.text('DESCRIPTION',30,y);
 doc.text('PART NO.',110,y,{align:'center'});
 doc.text('QTY',130,y,{align:'center'});
-doc.text('UNIT PRICE',170,y,{align:'right'});
-doc.text('TOTAL',195,y,{align:'right'});
+doc.text('UNIT PRICE (RM)',170,y,{align:'right'});
+doc.text('TOTAL (RM)',195,y,{align:'right'});
 y+=3;
 doc.line(10,y,200,y);
 y+=7;
@@ -177,14 +177,14 @@ const grand=subtotal+sst-discount;
 if(y > 220){ doc.addPage(); y=20; }
 
 y+=10;
-doc.text('SUBTOTAL',130,y); doc.text(subtotal.toFixed(2),180,y);
+doc.text('SUBTOTAL (RM)',130,y); doc.text(subtotal.toFixed(2),180,y);
 y+=6;
 doc.text('SST',130,y); doc.text(sst.toFixed(2),180,y);
 y+=6;
 doc.text('DISCOUNT',130,y); doc.text(discount.toFixed(2),180,y);
 y+=6;
 doc.setFont('courier','bold');
-doc.text('GRAND TOTAL',130,y); doc.text(grand.toFixed(2),180,y);
+doc.text('GRAND TOTAL (RM)',130,y); doc.text(grand.toFixed(2),180,y);
 
 y+=15;
 doc.setFont('courier','normal');
