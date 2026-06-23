@@ -64,6 +64,19 @@ document.querySelector('#tbl tbody').appendChild(tr);
 }
 addRow();
 
+function numberToWords(num){
+const ones=['','ONE','TWO','THREE','FOUR','FIVE','SIX','SEVEN','EIGHT','NINE','TEN','ELEVEN','TWELVE','THIRTEEN','FOURTEEN','FIFTEEN','SIXTEEN','SEVENTEEN','EIGHTEEN','NINETEEN'];
+const tens=['','','TWENTY','THIRTY','FORTY','FIFTY','SIXTY','SEVENTY','EIGHTY','NINETY'];
+function convert(n){
+if(n<20) return ones[n];
+if(n<100) return tens[Math.floor(n/10)] + (n%10?' '+ones[n%10]:'');
+if(n<1000) return ones[Math.floor(n/100)]+' HUNDRED '+(n%100?convert(n%100):'');
+if(n<1000000) return convert(Math.floor(n/1000))+' THOUSAND '+(n%1000?convert(n%1000):'');
+return String(n);
+}
+return convert(Math.floor(num));
+}
+
 async function generatePDF(){
 const {jsPDF}=window.jspdf;
 const doc=new jsPDF();
@@ -95,8 +108,8 @@ const companyAddress = [
 doc.text(companyAddress,15,y);
 y += 16;
 
-doc.text('Tel: 011 3765 9851',15,y);
-doc.text('Email: infokessa.malaysia@gmail.com',70,y);
+doc.text('Tel: +6011 3765 9851',15,y);
+doc.text('Email: infokessa.malaysia@gmail.com',60,y);
 y += 5;
 doc.text('Website: www.kessa.my',15,y);
 
@@ -121,8 +134,8 @@ doc.text('ITEM',15,y,{align:'center'});
 doc.text('DESCRIPTION',30,y);
 doc.text('PART NO.',110,y,{align:'center'});
 doc.text('QTY',130,y,{align:'center'});
-doc.text('UNIT PRICE,RM',170,y,{align:'right'});
-doc.text('TOTAL,RM',195,y,{align:'right'});
+doc.text('UNIT PRICE (RM)',170,y,{align:'right'});
+doc.text('TOTAL (RM)',195,y,{align:'right'});
 y+=3; doc.line(10,y,200,y); y+=7;
 
 let subtotal=0;
@@ -144,8 +157,8 @@ doc.text('ITEM',15,y,{align:'center'});
 doc.text('DESCRIPTION',30,y);
 doc.text('PART NO.',110,y,{align:'center'});
 doc.text('QTY',130,y,{align:'center'});
-doc.text('UNIT PRICE,RM',170,y,{align:'right'});
-doc.text('TOTAL,RM',195,y,{align:'right'});
+doc.text('UNIT PRICE (RM)',170,y,{align:'right'});
+doc.text('TOTAL (RM)',195,y,{align:'right'});
 y+=3;
 doc.line(10,y,200,y);
 y+=7;
@@ -158,8 +171,8 @@ doc.text(String(i+1),15,y);
 doc.text(descLines,30,y);
 doc.text(partLines,110,y,{align:'center'});
 doc.text(String(q),130,y,{align:'center'});
-doc.text(p.toFixed(2),170,y,{align:'right'});
-doc.text(t.toFixed(2),195,y,{align:'right'});
+doc.text('RM ' + p.toFixed(2),170,y,{align:'right'});
+doc.text('RM ' + t.toFixed(2),195,y,{align:'right'});
 
 const rowHeight = Math.max(
 descLines.length * 5,
@@ -177,14 +190,22 @@ const grand=subtotal+sst-discount;
 if(y > 220){ doc.addPage(); y=20; }
 
 y+=10;
-doc.text('SUBTOTAL (RM)',130,y); doc.text(subtotal.toFixed(2),180,y);
+doc.text('SUBTOTAL',130,y); doc.text('RM ' + subtotal.toFixed(2),190,y,{align:'right'});
 y+=6;
-doc.text('SST',130,y); doc.text(sst.toFixed(2),180,y);
+doc.text('SST 8%',130,y); doc.text('RM ' + sst.toFixed(2),190,y,{align:'right'});
 y+=6;
-doc.text('DISCOUNT',130,y); doc.text(discount.toFixed(2),180,y);
+doc.text('DISCOUNT',130,y); doc.text('RM ' + discount.toFixed(2),190,y,{align:'right'});
 y+=6;
 doc.setFont('courier','bold');
-doc.text('GRAND TOTAL (RM)',130,y); doc.text(grand.toFixed(2),180,y);
+doc.text('GRAND TOTAL',130,y); doc.text('RM ' + grand.toFixed(2),190,y,{align:'right'});
+
+y += 12;
+doc.setFont('courier','bold');
+doc.text('AMOUNT IN WORDS :',15,y);
+y += 6;
+doc.setFont('courier','normal');
+const amountWords = numberToWords(grand).toUpperCase();
+doc.text('RINGGIT MALAYSIA ' + amountWords + ' ONLY',15,y);
 
 y+=15;
 doc.setFont('courier','normal');
@@ -198,7 +219,7 @@ doc.text('Prepared By,',15,y);
 y+=15;
 doc.text("Ts. Muhammad\ Khairul Bin Samuri",15,y);
 y+=5;
-doc.text('Technical Sale Manager',15,y);
+doc.text('Director of Engineering & Business Development',15,y);
 
 doc.save(qNo+'.pdf');
 }
